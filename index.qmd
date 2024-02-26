@@ -1,0 +1,4 @@
+# Preface {.unnumbered}
+
+This book is a guide to to power-spectrum based analysis of paleo-climate data. It is primarily intended for members of the Earth System Diagnostics group. 
+

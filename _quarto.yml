@@ -1,0 +1,27 @@
+project:
+  type: book
+
+book:
+  title: "paleo-spectral-analysis"
+  author: "Thomas Laepple, Andrew Dolman"
+  date: "2/26/2024"
+  chapters:
+    - index.qmd
+    - intro.qmd
+    - part: Estimating powerspectra
+      chapters:
+        - regular-timeseries.qmd
+        - irregular-timeseries.qmd
+    - part: Simulating Timeseries
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+  pdf:
+    documentclass: scrreprt
+
+editor: source
+
