@@ -1,0 +1,56 @@
+# Variance from a powerspectrum
+
+The integral of the full power spectrum is equal to the variance of the whole timeseries. We can calculate this by summing the spectral estimates and multiplying by delta_f. 
+
+
+```{r setup}
+library(PaleoSpec)
+library(ggplot2)
+```
+
+```{r}
+set.seed(20240228)
+N <- 1e03
+delta_t = 1
+
+ts1 <- ts(rnorm(N), deltat = delta_t) * 5
+sp1 <- SpecMTM(ts1, detrend = TRUE)
+```
+
+```{r}
+gg_spec(sp1) +
+  scale_x_continuous() 
+```
+
+Note that SpecMTM returns only the positive frequencies, therefore to get the total variance we must multiply by a factor of 2.
+
+```{r}
+var(ts1)
+
+2 * sum(sp1$spec) * diff(sp1$freq)[1]
+```
+
+Why are these not identical?
+
+## Variance by timescale
+
+As we simulated a "white" timeseries, the total variance of the timeseries is spread equally across all frequencies. Therefore the integrals of the low and upper halves of the power spectrum are expected to be equal and sum to the variance of the whole timeseries.
+
+PaleoSpec has a function `GetVarFromSpectra` which we will use to integrate sections of the power spectrum
+
+```{r}
+
+f_range <- c(1/N, 1/2)
+f_range_low <- c(1/N, mean(f_range))
+f_range_high <- c(mean(f_range), 1/2)
+
+PaleoSpec::GetVarFromSpectra(sp1, f_range)
+
+PaleoSpec::GetVarFromSpectra(sp1, f_range_low)
+PaleoSpec::GetVarFromSpectra(sp1, f_range_high)
+
+
+PaleoSpec::GetVarFromSpectra(sp1, f_range_low)$var +
+PaleoSpec::GetVarFromSpectra(sp1, f_range_high)$var
+
+```

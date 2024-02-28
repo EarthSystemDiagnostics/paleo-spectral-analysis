@@ -13,6 +13,9 @@ book:
       chapters:
         - regular-timeseries.qmd
         - irregular-timeseries.qmd
+    - part: Variance
+      chapters:
+        - variance.qmd
     - part: Simulating Timeseries
     - references.qmd
 
