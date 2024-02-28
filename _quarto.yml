@@ -8,6 +8,7 @@ book:
   chapters:
     - index.qmd
     - intro.qmd
+    - quick-start.qmd
     - part: Estimating powerspectra
       chapters:
         - regular-timeseries.qmd
