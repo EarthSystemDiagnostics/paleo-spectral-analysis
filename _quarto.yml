@@ -2,7 +2,7 @@ project:
   type: book
 
 book:
-  title: "paleo-spectral-analysis"
+  title: "Spectral Analysis for Paleo Data"
   author: "Thomas Laepple, Andrew Dolman"
   date: "2/26/2024"
   chapters:
