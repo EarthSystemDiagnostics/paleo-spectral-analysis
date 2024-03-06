@@ -2,9 +2,16 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "paleo-spectral-analysis",
+    "title": "Spectral Analysis for Paleo Data",
     "section": "",
     "text": "Preface\nThis book is a guide to to power-spectrum based analysis of paleo-climate data. It is primarily intended for members of the Earth System Diagnostics group."
+  },
+  {
+    "objectID": "intro.html",
+    "href": "intro.html",
+    "title": "1  Introduction",
+    "section": "",
+    "text": "Test"
   },
   {
     "objectID": "quick-start.html#installation",
