@@ -4,115 +4,62 @@
     "href": "index.html",
     "title": "paleo-spectral-analysis",
     "section": "",
-    "text": "Preface\nThis book is a guide to to power-spectrum based analysis of paleo-climate data. It is primarily intended for members of the Earth System Diagnostics group.",
-    "crumbs": [
-      "Preface"
-    ]
+    "text": "Preface\nThis book is a guide to to power-spectrum based analysis of paleo-climate data. It is primarily intended for members of the Earth System Diagnostics group."
   },
   {
-    "objectID": "intro.html",
-    "href": "intro.html",
-    "title": "1  Introduction",
-    "section": "",
-    "text": "This is a book created from markdown and executable code.\nSee Knuth (1984) for additional discussion of literate programming.\n\n1 + 1\n\n[1] 2\n\n\n\n\n\n\nKnuth, Donald E. 1984. “Literate Programming.” Comput. J. 27 (2): 97–111. https://doi.org/10.1093/comjnl/27.2.97.",
-    "crumbs": [
-      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
-    ]
-  },
-  {
-    "objectID": "quick-start.html",
-    "href": "quick-start.html",
+    "objectID": "quick-start.html#installation",
+    "href": "quick-start.html#installation",
     "title": "2  Quick intro to PaleoSpec",
-    "section": "",
-    "text": "2.1 Installation\nYou can install the development version of PaleoSpec from GitHub with:\n# install.packages(\"remotes\")\nremotes::install_github(\"EarthSystemDiagnostics/paleospec\")\nPlease refer to function references here: https://earthsystemdiagnostics.github.io/paleospec/reference/index.html",
-    "crumbs": [
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Quick intro to PaleoSpec</span>"
-    ]
+    "section": "2.1 Installation",
+    "text": "2.1 Installation\nYou can install the development version of PaleoSpec from GitHub with:\n\n# install.packages(\"remotes\")\nremotes::install_github(\"EarthSystemDiagnostics/paleospec\")\n\nPlease refer to function references here: https://earthsystemdiagnostics.github.io/paleospec/reference/index.html"
   },
   {
     "objectID": "quick-start.html#usage",
     "href": "quick-start.html#usage",
     "title": "2  Quick intro to PaleoSpec",
     "section": "2.2 Usage",
-    "text": "2.2 Usage\nSpecMTM can be used to estimate the power spectrum of a timeseries using the multitaper method.\nHere we estimate the spectrum of the monthly sunspot data that comes with R. The sunspot data are already a timeseries object so SpecMTM knows the correct frequency of the observations. We can plot the power spectrum with the PaleoSpec function LPlot.\n\nsunspot &lt;- datasets::sunspot.month\nplot(sunspot)\n\n\n\n\n\n\n\n\n\nlibrary(PaleoSpec)\nsp_sun &lt;- SpecMTM(sunspot)\nLPlot(sp_sun)\n\n\n\n\n\n\n\n\nAlternatively we can use the gg_spec() function to get a ggplot2\n\ngg_spec(sp_sun)\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\n\n\n\n\nAppproximate confidence intervals can be added with the function AddConfInterval()\n\nsp_sun &lt;- AddConfInterval(sp_sun)\ngg_spec(sp_sun)\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\n\n\n\n\n\n2.2.1 Simulating timeseries with given spectral properties\nSimPLS can be used to create a timeseries whose power spectrum has powerlaw like properties, where: \\(S(f) = \\alpha f^{-\\beta}\\)\n\n# setting the seed of the random number generator so that this example will \n# always generate the same time series\nset.seed(20221109)\n\n# length of the time series\nN &lt;- 1e03\n\n# parameters of the powerlaw spectrum\nalpha &lt;- 0.1\nbeta &lt;- 1\n\nts1 &lt;- SimPLS(N = N, b = beta, a = alpha)\nplot(ts1, type = \"l\")\n\n\n\n\n\n\n\n\nSpecMTM can again be used to estimate the power spectrum using the multitaper method. If we convert the vector from SimPLS to a timeseries object, and add information about the sampling frequency of the timeseries then SpecMTM will have the correct frequency axis.\n\nsp1 &lt;- SpecMTM(ts(ts1, deltat = 1))\n\nLPlot(sp1)\nabline(log10(alpha), -beta, col = \"red\")\n\n\n\n\n\n\n\n\n\n\n2.2.2 Smoothing and adding confidence intervals\nYou can add confidence intervals to the spectral estimates with AddConfInterval\n\nsp1 &lt;- AddConfInterval(sp1)\nLPlot(sp1)\nabline(log10(alpha), -beta, col = \"red\")\n\n\n\n\n\n\n\n\nThe LogSmooth function can be used to smooth power spectra with equally spaced filter in log-space.\n\nsp1_f &lt;- LogSmooth(sp1, df.log = 0.01)\nLPlot(sp1)\nLLines(sp1_f, col = \"green\")",
-    "crumbs": [
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Quick intro to PaleoSpec</span>"
-    ]
+    "text": "2.2 Usage\nSpecMTM can be used to estimate the power spectrum of a timeseries using the multitaper method.\nHere we estimate the spectrum of the monthly sunspot data that comes with R. The sunspot data are already a timeseries object so SpecMTM knows the correct frequency of the observations. We can plot the power spectrum with the PaleoSpec function LPlot.\n\nsunspot <- datasets::sunspot.month\nplot(sunspot)\n\n\n\n\n\nlibrary(PaleoSpec)\nsp_sun <- SpecMTM(sunspot)\nLPlot(sp_sun)\n\n\n\n\nAlternatively we can use the gg_spec() function to get a ggplot2\n\ngg_spec(sp_sun)\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\nAppproximate confidence intervals can be added with the function AddConfInterval()\n\nsp_sun <- AddConfInterval(sp_sun)\ngg_spec(sp_sun)\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\n\n2.2.1 Simulating timeseries with given spectral properties\nSimPLS can be used to create a timeseries whose power spectrum has powerlaw like properties, where: \\(S(f) = \\alpha f^{-\\beta}\\)\n\n# setting the seed of the random number generator so that this example will \n# always generate the same time series\nset.seed(20221109)\n\n# length of the time series\nN <- 1e03\n\n# parameters of the powerlaw spectrum\nalpha <- 0.1\nbeta <- 1\n\nts1 <- SimPLS(N = N, b = beta, a = alpha)\nplot(ts1, type = \"l\")\n\n\n\n\nSpecMTM can again be used to estimate the power spectrum using the multitaper method. If we convert the vector from SimPLS to a timeseries object, and add information about the sampling frequency of the timeseries then SpecMTM will have the correct frequency axis.\n\nsp1 <- SpecMTM(ts(ts1, deltat = 1))\n\nLPlot(sp1)\nabline(log10(alpha), -beta, col = \"red\")\n\n\n\n\n\n\n2.2.2 Smoothing and adding confidence intervals\nYou can add confidence intervals to the spectral estimates with AddConfInterval\n\nsp1 <- AddConfInterval(sp1)\nLPlot(sp1)\nabline(log10(alpha), -beta, col = \"red\")\n\n\n\n\nThe LogSmooth function can be used to smooth power spectra with equally spaced filter in log-space.\n\nsp1_f <- LogSmooth(sp1, df.log = 0.01)\nLPlot(sp1)\nLLines(sp1_f, col = \"green\")"
   },
   {
-    "objectID": "regular-timeseries.html",
-    "href": "regular-timeseries.html",
+    "objectID": "regular-timeseries.html#the-fourier-transform",
+    "href": "regular-timeseries.html#the-fourier-transform",
     "title": "3  Regular timeseries",
-    "section": "",
-    "text": "3.1 The Fourier Transform",
-    "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular timeseries</span>"
-    ]
+    "section": "3.1 The Fourier Transform",
+    "text": "3.1 The Fourier Transform"
   },
   {
     "objectID": "regular-timeseries.html#the-multitaper-method",
     "href": "regular-timeseries.html#the-multitaper-method",
     "title": "3  Regular timeseries",
     "section": "3.2 The Multitaper Method",
-    "text": "3.2 The Multitaper Method",
-    "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular timeseries</span>"
-    ]
+    "text": "3.2 The Multitaper Method"
   },
   {
     "objectID": "regular-timeseries.html#errors",
     "href": "regular-timeseries.html#errors",
     "title": "3  Regular timeseries",
     "section": "3.3 Errors",
-    "text": "3.3 Errors\n\nExplain Gamma / Chi-Sq nature of the errors\nDegrees of freedom / shape of Gamma\nEffect of tapering and smoothing on error distribution\nConfidence intervals",
-    "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular timeseries</span>"
-    ]
+    "text": "3.3 Errors\n\nExplain Gamma / Chi-Sq nature of the errors\nDegrees of freedom / shape of Gamma\nEffect of tapering and smoothing on error distribution\nConfidence intervals"
   },
   {
-    "objectID": "irregular-timeseries.html",
-    "href": "irregular-timeseries.html",
+    "objectID": "irregular-timeseries.html#interpolation",
+    "href": "irregular-timeseries.html#interpolation",
     "title": "4  Irregular time-series",
-    "section": "",
-    "text": "4.1 Interpolation",
-    "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Irregular time-series</span>"
-    ]
+    "section": "4.1 Interpolation",
+    "text": "4.1 Interpolation"
   },
   {
     "objectID": "irregular-timeseries.html#binning",
     "href": "irregular-timeseries.html#binning",
     "title": "4  Irregular time-series",
     "section": "4.2 Binning",
-    "text": "4.2 Binning",
-    "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Irregular time-series</span>"
-    ]
+    "text": "4.2 Binning"
   },
   {
-    "objectID": "variance.html",
-    "href": "variance.html",
+    "objectID": "variance.html#variance-by-timescale",
+    "href": "variance.html#variance-by-timescale",
     "title": "5  Variance from a powerspectrum",
-    "section": "",
-    "text": "5.1 Variance by timescale\nAs we simulated a “white” timeseries, the total variance of the timeseries is spread equally across all frequencies. Therefore the integrals of the low and upper halves of the power spectrum are expected to be equal and sum to the variance of the whole timeseries.\nPaleoSpec has a function GetVarFromSpectra which we will use to integrate sections of the power spectrum\nf_range &lt;- c(1/N, 1/2)\nf_range_low &lt;- c(1/N, mean(f_range))\nf_range_high &lt;- c(mean(f_range), 1/2)\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range)\n\n$var\n[1] 25.63878\n\n$dof\n[1] 959.4585\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_low)\n\n$var\n[1] 12.97496\n\n$dof\n[1] 481.1547\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_high)\n\n$var\n[1] 12.66096\n\n$dof\n[1] 478.2898\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_low)$var +\nPaleoSpec::GetVarFromSpectra(sp1, f_range_high)$var\n\n[1] 25.63592",
-    "crumbs": [
-      "Variance",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Variance from a powerspectrum</span>"
-    ]
-  },
-  {
-    "objectID": "references.html",
-    "href": "references.html",
-    "title": "References",
-    "section": "",
-    "text": "Knuth, Donald E. 1984. “Literate Programming.” Comput.\nJ. 27 (2): 97–111. https://doi.org/10.1093/comjnl/27.2.97.",
-    "crumbs": [
-      "References"
-    ]
+    "section": "5.1 Variance by timescale",
+    "text": "5.1 Variance by timescale\nAs we simulated a “white” timeseries, the total variance of the timeseries is spread equally across all frequencies. Therefore the integrals of the low and upper halves of the power spectrum are expected to be equal and sum to the variance of the whole timeseries.\nPaleoSpec has a function GetVarFromSpectra which we will use to integrate sections of the power spectrum\n\nf_range <- c(1/N, 1/2)\nf_range_low <- c(1/N, mean(f_range))\nf_range_high <- c(mean(f_range), 1/2)\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range)\n\n$var\n[1] 25.63878\n\n$dof\n[1] 959.4585\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_low)\n\n$var\n[1] 12.97496\n\n$dof\n[1] 481.1547\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_high)\n\n$var\n[1] 12.66096\n\n$dof\n[1] 478.2898\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_low)$var +\nPaleoSpec::GetVarFromSpectra(sp1, f_range_high)$var\n\n[1] 25.63592"
   }
 ]
