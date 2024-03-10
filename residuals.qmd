@@ -1,0 +1,182 @@
+# Distribution of spectral power estimates
+
+```{r packages}
+library(PaleoSpec)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+## Errors on the power spectrum of single timeseries
+
+If the power spectrum of a stochastic timeseries is estimated using the basic Fourier transform method, i.e. we take the raw periodogram with no smoothing, padding or tapering, then the power spectral density estimates are exponentially distributed around their expected value (true value if we know it). They are equivalently described as "chi-squared" distributed with 2 degrees of freedom, or "gamma" distributed with shape = 1, scale = 1. The exponential is a special case of the gamma, and the gamma will be useful later on.   
+
+Here we demonstrate this by simulating a timeseries, using R's function for getting the periodogram, calculating the residuals from the "true" spectrum, creating a histrogram of the residuals, and overlaying the probability density function for the exponential distribution.
+
+We define the "residuals" as the ratio of the estimated PSD $\hat{S}$ to the true PSD $S$.
+
+$$ \frac{\hat{S}}{S} $$
+
+Or equivalently the difference in the log of these values
+
+$$
+\log{\hat{S}} - \log{S}
+$$
+
+```{r}
+n <- 1e04
+alpha <- 0.025
+beta = 1
+
+t1 <- sim.proxy.series(nt = n, a = alpha, b = beta)
+sp1 <- spec.pgram(t1, taper = 0, plot = FALSE)
+
+LPlot(sp1)
+abline(a = log10(alpha), b = -beta, col = "red")
+
+true_spec <- (alpha * sp1$freq ^-beta)
+resids_sp1 <- sp1$spec / true_spec
+
+xax <- seq(-1, max(resids_sp1), length.out = 1000)
+dExp <- dexp(xax, 1)
+hist(resids_sp1, 50, freq = FALSE)
+lines(xax, dExp, col = "blue")
+```
+
+In log-space the distribution of these residuals comes closer to being normal, however you can see that the distribution is skewed. 
+
+```{r}
+hist(log(resids_sp1), freq = FALSE)
+xax_log <- seq(-10, 5, length.out = 1000)
+lines(xax_log, dnorm(xax_log, 0, sd(log(resids_sp1))), col = "blue")
+```
+
+
+## Errors on the mean spectrum of multiple timeseries
+
+With a single time series the errors are exponentially distributed, a special case of the gamma distribution with shape = 1 and scale = 1. More generally, if we estimate the power spectra of multiple, n, timeseries and then calculate the mean power spectrum, the errors of this mean spectrum are gamma distributed with shape = n and scale = 1/n (or shape = n, rate = n).
+
+This follows as the gamma distribution is the "sampling distribution" of the exponential. That is, if you take means of samples of size n from an exponential distribution, the distribution of these means is gamma distributed.
+
+```{r}
+t2 <- sim.proxy.series(nt = n, a = alpha, b = beta)
+t3 <- sim.proxy.series(nt = n, a = alpha, b = beta)
+
+t10 <- replicate(10, {
+  sim.proxy.series(nt = n, a = alpha, b = beta)
+})
+
+# The SpecACF function can take a matrix of timeseries and return the mean spectrum
+sp2 <- SpecACF(cbind(t1, t2), 1)
+sp3 <- SpecACF(cbind(t1, t2, t3), 1)
+sp10 <- SpecACF(t10, 1)
+
+resids_sp2 <- sp2$spec / true_spec
+resids_sp3 <- sp3$spec / true_spec
+resids_sp10 <- sp10$spec / true_spec
+
+```
+
+
+```{r}
+gg_spec(list(
+  sp1, sp2, sp3)
+  ) 
+```
+
+
+```{r}
+xax <- seq(-1, 20, length.out = 1000)
+hist(resids_sp1, 100, freq = FALSE)
+hist(resids_sp3, 50, freq = FALSE, add = T, col = "darkgreen")
+hist(resids_sp2, 50, freq = FALSE, add = T, col = "blue")
+#hist(resids_sp10, 30, freq = FALSE, add = T, col = "red")
+
+k <- 1
+lines(xax, dgamma(xax, k, k), col = "black")
+
+k <- 3
+lines(xax, dgamma(xax, shape = k, scale = 1/k), col = "green")
+
+k <- 2
+lines(xax, dgamma(xax, shape = k, scale = 1/k), col = "lightblue")
+
+#k <- 10
+#lines(xax, dgamma(xax, shape = k, scale = 1/k), col = "pink")
+
+```
+
+In log-space the distribution becomes more symmetrical as n increases.
+
+```{r}
+hist(log(resids_sp1), 100, freq = FALSE, ylim = c(0, 0.8))
+hist(log(resids_sp2), 50, freq = FALSE, add = T, col = "blue")
+hist(log(resids_sp3), 50, freq = FALSE, add = T, col = "darkgreen")
+#hist(log(resids_sp10), 50, freq = FALSE, add = T, col = "red")
+```
+
+
+<!-- ```{r} -->
+<!-- resids_long <- tibble(`1` = resids_sp1, `2` = resids_sp2, `3` = resids_sp3) %>% -->
+<!--   pivot_longer(cols = 1:3, names_to = "N_spectra", values_to = "Errors") -->
+
+<!-- dgamma_long <- crossing( -->
+<!--   x = seq(-0.1, 10, length.out = 1000), -->
+<!--   N_spectra = 1:3 -->
+<!-- ) %>% -->
+<!--   mutate( -->
+<!--     d = dgamma(x, shape = N_spectra, scale = 1/N_spectra), -->
+<!--     N_spectra = as.character(N_spectra) -->
+<!--   ) -->
+
+<!-- resids_long %>% -->
+<!--   ggplot(aes(x = Errors, fill = N_spectra)) + -->
+<!--   geom_histogram(position = position_identity(), aes(y= after_stat(density)), bins = 100, alpha = 0.5) + -->
+<!--   geom_line(data = dgamma_long, aes(x = x, y = d, colour = N_spectra)) + -->
+<!--   theme_bw() -->
+<!-- ``` -->
+
+<!-- ```{r} -->
+<!-- resids_long %>% -->
+<!--   ggplot(aes(x = log(Errors), fill = as.character(N_spectra))) + -->
+<!--   geom_histogram(position = position_identity(), aes(y= after_stat(density)), bins = 50, alpha = 0.5) + -->
+<!--   #scale_x_log10() + -->
+<!--   theme_bw() -->
+<!-- ``` -->
+
+
+## Smoothed / tapered / padded spectral estimates
+
+
+Spectral estimates using the raw periodogram, with no padding or tapering are fully independent (uncorrelated with each other) and have 2n degrees of freedom (are gamma distributed with shape = dof/2). If more sophisticated methods are used to estimate the spectrum, or if we smooth the spectrum, then this no longer holds true.
+
+
+```{r}
+sp1_mtm <- SpecMTM(ts(t1))
+
+gg_spec(list(
+  "2-MTM" = sp1_mtm, "1-Raw pgram" = sp1
+))
+
+par(mfrow = c(1,2))
+acf(sp1$spec / true_spec, lag.max = 10)
+acf(sp1_mtm$spec / true_spec, lag.max = 10)
+par(mfrow = c(1,1))
+```
+
+For the MTM method with the default 3 tapers, the degrees of freedom are not the same for all frequencies, and on average decline slightly with frequency.
+
+```{r}
+plot(sp1_mtm$freq, sp1_mtm$dof, type = "l")
+mean_dof <- mean(sp1_mtm$dof)
+mean_dof
+```
+
+The distribution of the errors is still approximately gamma with shape equal to the mean degrees of freedom, but the errors are now serially correlated with each other.
+
+```{r}
+hist(sp1_mtm$spec / true_spec, freq = FALSE, ylim = c(0, 1), breaks = 15)
+xax <- seq(-1, 5, length.out = 1000)
+lines(xax, dgamma(xax, mean_dof, scale = 1/mean_dof), col = "red")
+```
+

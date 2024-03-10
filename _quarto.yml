@@ -12,6 +12,7 @@ book:
     - part: Estimating powerspectra
       chapters:
         - regular-timeseries.qmd
+        - residuals.qmd
         - irregular-timeseries.qmd
     - part: Variance
       chapters:
