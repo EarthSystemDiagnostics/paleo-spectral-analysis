@@ -11,14 +11,9 @@ book:
     - quick-start.qmd
     - part: Estimating power spectra
       chapters:
-<<<<<<< HEAD
-        - regular-timeseries.qmd
-        - residuals.qmd
-        - irregular-timeseries.qmd
-=======
         - regular-time-series.qmd
         - irregular-time-series.qmd
->>>>>>> main
+        - residuals.qmd
     - part: Variance
       chapters:
         - variance.qmd
