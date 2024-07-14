@@ -34,75 +34,119 @@
     "href": "quick-start.html#usage",
     "title": "2  Quick intro to PaleoSpec",
     "section": "2.2 Usage",
-    "text": "2.2 Usage\nSpecMTM can be used to estimate the power spectrum of a timeseries using the multitaper method.\nHere we estimate the spectrum of the monthly sunspot data that comes with R. The sunspot data are already a timeseries object so SpecMTM knows the correct frequency of the observations. We can plot the power spectrum with the PaleoSpec function LPlot.\n\nsunspot &lt;- datasets::sunspot.month\nplot(sunspot)\n\n\n\n\n\n\n\n\n\nlibrary(PaleoSpec)\nsp_sun &lt;- SpecMTM(sunspot)\nLPlot(sp_sun)\n\n\n\n\n\n\n\n\nAlternatively we can use the gg_spec() function to get a ggplot2\n\ngg_spec(sp_sun)\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\n\n\n\n\nAppproximate confidence intervals can be added with the function AddConfInterval()\n\nsp_sun &lt;- AddConfInterval(sp_sun)\ngg_spec(sp_sun)\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\n\n\n\n\n\n2.2.1 Simulating timeseries with given spectral properties\nSimPLS can be used to create a timeseries whose power spectrum has powerlaw like properties, where: \\(S(f) = \\alpha f^{-\\beta}\\)\n\n# setting the seed of the random number generator so that this example will \n# always generate the same time series\nset.seed(20221109)\n\n# length of the time series\nN &lt;- 1e03\n\n# parameters of the powerlaw spectrum\nalpha &lt;- 0.1\nbeta &lt;- 1\n\nts1 &lt;- SimPLS(N = N, b = beta, a = alpha)\nplot(ts1, type = \"l\")\n\n\n\n\n\n\n\n\nSpecMTM can again be used to estimate the power spectrum using the multitaper method. If we convert the vector from SimPLS to a timeseries object, and add information about the sampling frequency of the timeseries then SpecMTM will have the correct frequency axis.\n\nsp1 &lt;- SpecMTM(ts(ts1, deltat = 1))\n\nLPlot(sp1)\nabline(log10(alpha), -beta, col = \"red\")\n\n\n\n\n\n\n\n\n\n\n2.2.2 Smoothing and adding confidence intervals\nYou can add confidence intervals to the spectral estimates with AddConfInterval\n\nsp1 &lt;- AddConfInterval(sp1)\nLPlot(sp1)\nabline(log10(alpha), -beta, col = \"red\")\n\n\n\n\n\n\n\n\nThe LogSmooth function can be used to smooth power spectra with equally spaced filter in log-space.\n\nsp1_f &lt;- LogSmooth(sp1, df.log = 0.01)\nLPlot(sp1)\nLLines(sp1_f, col = \"green\")",
+    "text": "2.2 Usage\nSpecMTM can be used to estimate the power spectrum of a time series using the multitaper method.\nHere we estimate the spectrum of the monthly sunspot data that comes with R. The sunspot data are already a time series object so SpecMTM knows the correct frequency of the observations. We can plot the power spectrum with the PaleoSpec function LPlot.\n\nsunspot &lt;- datasets::sunspot.month\nplot(sunspot)\n\n\n\n\n\n\n\n\n\nlibrary(PaleoSpec)\nsp_sun &lt;- SpecMTM(sunspot)\nLPlot(sp_sun)\n\n\n\n\n\n\n\n\nAlternatively we can use the gg_spec() function to get a ggplot2\n\ngg_spec(sp_sun)\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\n\n\n\n\nAppproximate confidence intervals can be added with the function AddConfInterval()\n\nsp_sun &lt;- AddConfInterval(sp_sun)\ngg_spec(sp_sun)\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\n\n\n\n\n\n2.2.1 Simulating time series with given spectral properties\nSimPLS can be used to create a time series whose power spectrum has powerlaw like properties, where: \\(S(f) = \\alpha f^{-\\beta}\\)\n\n# setting the seed of the random number generator so that this example will \n# always generate the same time series\nset.seed(20221109)\n\n# length of the time series\nN &lt;- 1e03\n\n# parameters of the powerlaw spectrum\nalpha &lt;- 0.1\nbeta &lt;- 1\n\nts1 &lt;- SimPLS(N = N, b = beta, a = alpha)\nplot(ts1, type = \"l\")\n\n\n\n\n\n\n\n\nSpecMTM can again be used to estimate the power spectrum using the multitaper method. If we convert the vector from SimPLS to a time series object, and add information about the sampling frequency of the time series then SpecMTM will have the correct frequency axis.\n\nsp1 &lt;- SpecMTM(ts(ts1, deltat = 1))\n\nLPlot(sp1)\nabline(log10(alpha), -beta, col = \"red\")\n\n\n\n\n\n\n\n\n\n\n2.2.2 Smoothing and adding confidence intervals\nYou can add confidence intervals to the spectral estimates with AddConfInterval\n\nsp1 &lt;- AddConfInterval(sp1)\nLPlot(sp1)\nabline(log10(alpha), -beta, col = \"red\")\n\n\n\n\n\n\n\n\nThe LogSmooth function can be used to smooth power spectra with equally spaced filter in log-space.\n\nsp1_f &lt;- LogSmooth(sp1, df.log = 0.01)\nLPlot(sp1)\nLLines(sp1_f, col = \"green\")",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Quick intro to PaleoSpec</span>"
     ]
   },
   {
-    "objectID": "regular-timeseries.html",
-    "href": "regular-timeseries.html",
-    "title": "3  Regular timeseries",
+    "objectID": "regular-time-series.html",
+    "href": "regular-time-series.html",
+    "title": "3  Regular time series",
     "section": "",
-    "text": "3.1 The Fourier Transform",
+    "text": "3.1 The Fourier Transform\nsunspot &lt;- datasets::sunspot.month\nplot(sunspot)\nlibrary(PaleoSpec)\nsp_sun &lt;- SpecMTM(sunspot)\nLPlot(sp_sun)",
     "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular timeseries</span>"
+      "Estimating power spectra",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular time series</span>"
     ]
   },
   {
-    "objectID": "regular-timeseries.html#the-multitaper-method",
-    "href": "regular-timeseries.html#the-multitaper-method",
-    "title": "3  Regular timeseries",
+    "objectID": "regular-time-series.html#the-multitaper-method",
+    "href": "regular-time-series.html#the-multitaper-method",
+    "title": "3  Regular time series",
     "section": "3.2 The Multitaper Method",
     "text": "3.2 The Multitaper Method",
     "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular timeseries</span>"
+      "Estimating power spectra",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular time series</span>"
     ]
   },
   {
-    "objectID": "regular-timeseries.html#errors",
-    "href": "regular-timeseries.html#errors",
-    "title": "3  Regular timeseries",
-    "section": "3.3 Errors",
-    "text": "3.3 Errors\n\nExplain Gamma / Chi-Sq nature of the errors\nDegrees of freedom / shape of Gamma\nEffect of tapering and smoothing on error distribution\nConfidence intervals",
+    "objectID": "regular-time-series.html#to-detrend-or-not",
+    "href": "regular-time-series.html#to-detrend-or-not",
+    "title": "3  Regular time series",
+    "section": "3.3 To detrend or not",
+    "text": "3.3 To detrend or not\n\nEven with detrend = FALSE, SpecMTM does some detrending - must be part of the tapering?\n\n\nlibrary(dplyr)\n\n\nAttaching package: 'dplyr'\n\n\nThe following objects are masked from 'package:stats':\n\n    filter, lag\n\n\nThe following objects are masked from 'package:base':\n\n    intersect, setdiff, setequal, union\n\nlibrary(tidyr)\nlibrary(PaleoSpec)\nlibrary(ggplot2)\n\n\nN &lt;- 1e03\nn_rep &lt;- 100\nalpha = 0.1\nbeta = 0\n\ndat &lt;- crossing(\n  rep = 1:n_rep,\n  t = 1:N\n) %&gt;% \n  group_by(rep) %&gt;% \n  mutate(\n    y = PaleoSpec::SimPLS(N = N, beta = beta, alpha = alpha) \n  )\n\n\nspecs &lt;- dat %&gt;% \n  group_by(rep) %&gt;% \n  do({\n    Spec2DF(SpecMTM(ts(.$y), \n                    detrend = TRUE\n                    )\n            )\n  })\n\n# specs &lt;- dat %&gt;% \n#   group_by(rep) %&gt;% \n#   do({\n#     Spec2DF(SpecACF(ts(.$y), bin.width = 1,\n#                     detrend = FALSE, \n#                     #K = 0, nw = 1\n#                     )\n#             )\n#   })\n\n\n\nmean_spec &lt;- specs %&gt;% \n  group_by(freq) %&gt;% \n  summarise_if(is.numeric, mean)\n\n\nmean_spec %&gt;% \n  as_spec_df() %&gt;% \n  gg_spec() +\n  #geom_point() +\n  geom_abline(intercept = log10(alpha), slope = -beta, colour = \"red\") #+\n\nScale for colour is already present.\nAdding another scale for colour, which will replace the existing scale.\n\n\n\n\n\n\n\n\n  #expand_limits(y = 100)",
     "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular timeseries</span>"
+      "Estimating power spectra",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular time series</span>"
     ]
   },
   {
-    "objectID": "irregular-timeseries.html",
-    "href": "irregular-timeseries.html",
-    "title": "4  Irregular time-series",
+    "objectID": "regular-time-series.html#errors",
+    "href": "regular-time-series.html#errors",
+    "title": "3  Regular time series",
+    "section": "3.4 Errors",
+    "text": "3.4 Errors\n\nExplain Gamma / Chi-Sq nature of the errors\nDegrees of freedom / shape of Gamma\nEffect of tapering and smoothing on error distribution\nConfidence intervals",
+    "crumbs": [
+      "Estimating power spectra",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Regular time series</span>"
+    ]
+  },
+  {
+    "objectID": "irregular-time-series.html",
+    "href": "irregular-time-series.html",
+    "title": "4  Irregular time series",
     "section": "",
     "text": "4.1 Interpolation",
     "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Irregular time-series</span>"
+      "Estimating power spectra",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Irregular time series</span>"
     ]
   },
   {
-    "objectID": "irregular-timeseries.html#binning",
-    "href": "irregular-timeseries.html#binning",
-    "title": "4  Irregular time-series",
+    "objectID": "irregular-time-series.html#binning",
+    "href": "irregular-time-series.html#binning",
+    "title": "4  Irregular time series",
     "section": "4.2 Binning",
     "text": "4.2 Binning",
     "crumbs": [
-      "Estimating powerspectra",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Irregular time-series</span>"
+      "Estimating power spectra",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Irregular time series</span>"
+    ]
+  },
+  {
+    "objectID": "residuals.html",
+    "href": "residuals.html",
+    "title": "5  Distribution of spectral power estimates",
+    "section": "",
+    "text": "5.1 Errors on the power spectrum of single timeseries\nIf the power spectrum of a stochastic timeseries is estimated using the basic Fourier transform method, i.e. we take the raw periodogram with no smoothing, padding or tapering, then the power spectral density estimates are exponentially distributed around their expected value (true value if we know it). They are equivalently described as “chi-squared” distributed with 2 degrees of freedom, or “gamma” distributed with shape = 1, scale = 1. The exponential is a special case of the gamma, and the gamma will be useful later on.\nHere we demonstrate this by simulating a timeseries, using R’s function for getting the periodogram, calculating the residuals from the “true” spectrum, creating a histrogram of the residuals, and overlaying the probability density function for the exponential distribution.\nWe define the “residuals” as the ratio of the estimated PSD \\(\\hat{S}\\) to the true PSD \\(S\\).\n\\[ \\frac{\\hat{S}}{S} \\]\nOr equivalently the difference in the log of these values\n\\[\n\\log{\\hat{S}} - \\log{S}\n\\]\nn &lt;- 1e04\nalpha &lt;- 0.025\nbeta = 1\n\nt1 &lt;- sim.proxy.series(nt = n, a = alpha, b = beta)\nsp1 &lt;- spec.pgram(t1, taper = 0, plot = FALSE)\n\nLPlot(sp1)\nabline(a = log10(alpha), b = -beta, col = \"red\")\n\n\n\n\n\n\n\ntrue_spec &lt;- (alpha * sp1$freq ^-beta)\nresids_sp1 &lt;- sp1$spec / true_spec\n\nxax &lt;- seq(-1, max(resids_sp1), length.out = 1000)\ndExp &lt;- dexp(xax, 1)\nhist(resids_sp1, 50, freq = FALSE)\nlines(xax, dExp, col = \"blue\")\nIn log-space the distribution of these residuals comes closer to being normal, however you can see that the distribution is skewed.\nhist(log(resids_sp1), freq = FALSE)\nxax_log &lt;- seq(-10, 5, length.out = 1000)\nlines(xax_log, dnorm(xax_log, 0, sd(log(resids_sp1))), col = \"blue\")",
+    "crumbs": [
+      "Estimating power spectra",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Distribution of spectral power estimates</span>"
+    ]
+  },
+  {
+    "objectID": "residuals.html#errors-on-the-mean-spectrum-of-multiple-timeseries",
+    "href": "residuals.html#errors-on-the-mean-spectrum-of-multiple-timeseries",
+    "title": "5  Distribution of spectral power estimates",
+    "section": "5.2 Errors on the mean spectrum of multiple timeseries",
+    "text": "5.2 Errors on the mean spectrum of multiple timeseries\nWith a single time series the errors are exponentially distributed, a special case of the gamma distribution with shape = 1 and scale = 1. More generally, if we estimate the power spectra of multiple, n, timeseries and then calculate the mean power spectrum, the errors of this mean spectrum are gamma distributed with shape = n and scale = 1/n (or shape = n, rate = n).\nThis follows as the gamma distribution is the “sampling distribution” of the exponential. That is, if you take means of samples of size n from an exponential distribution, the distribution of these means is gamma distributed.\n\nt2 &lt;- sim.proxy.series(nt = n, a = alpha, b = beta)\nt3 &lt;- sim.proxy.series(nt = n, a = alpha, b = beta)\n\nt10 &lt;- replicate(10, {\n  sim.proxy.series(nt = n, a = alpha, b = beta)\n})\n\n# The SpecACF function can take a matrix of timeseries and return the mean spectrum\nsp2 &lt;- SpecACF(cbind(t1, t2), 1)\nsp3 &lt;- SpecACF(cbind(t1, t2, t3), 1)\nsp10 &lt;- SpecACF(t10, 1)\n\nresids_sp2 &lt;- sp2$spec / true_spec\nresids_sp3 &lt;- sp3$spec / true_spec\nresids_sp10 &lt;- sp10$spec / true_spec\n\n\ngg_spec(list(\n  sp1, sp2, sp3)\n  ) \n\n\n\n\n\n\n\n\n\nxax &lt;- seq(-1, 20, length.out = 1000)\nhist(resids_sp1, 100, freq = FALSE)\nhist(resids_sp3, 50, freq = FALSE, add = T, col = \"darkgreen\")\nhist(resids_sp2, 50, freq = FALSE, add = T, col = \"blue\")\n#hist(resids_sp10, 30, freq = FALSE, add = T, col = \"red\")\n\nk &lt;- 1\nlines(xax, dgamma(xax, k, k), col = \"black\")\n\nk &lt;- 3\nlines(xax, dgamma(xax, shape = k, scale = 1/k), col = \"green\")\n\nk &lt;- 2\nlines(xax, dgamma(xax, shape = k, scale = 1/k), col = \"lightblue\")\n\n\n\n\n\n\n\n#k &lt;- 10\n#lines(xax, dgamma(xax, shape = k, scale = 1/k), col = \"pink\")\n\nIn log-space the distribution becomes more symmetrical as n increases.\n\nhist(log(resids_sp1), 100, freq = FALSE, ylim = c(0, 0.8))\nhist(log(resids_sp2), 50, freq = FALSE, add = T, col = \"blue\")\nhist(log(resids_sp3), 50, freq = FALSE, add = T, col = \"darkgreen\")\n\n\n\n\n\n\n\n#hist(log(resids_sp10), 50, freq = FALSE, add = T, col = \"red\")",
+    "crumbs": [
+      "Estimating power spectra",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Distribution of spectral power estimates</span>"
+    ]
+  },
+  {
+    "objectID": "residuals.html#smoothed-tapered-padded-spectral-estimates",
+    "href": "residuals.html#smoothed-tapered-padded-spectral-estimates",
+    "title": "5  Distribution of spectral power estimates",
+    "section": "5.3 Smoothed / tapered / padded spectral estimates",
+    "text": "5.3 Smoothed / tapered / padded spectral estimates\nSpectral estimates using the raw periodogram, with no padding or tapering are fully independent (uncorrelated with each other) and have 2n degrees of freedom (are gamma distributed with shape = dof/2). If more sophisticated methods are used to estimate the spectrum, or if we smooth the spectrum, then this no longer holds true.\n\nsp1_mtm &lt;- SpecMTM(ts(t1))\n\ngg_spec(list(\n  \"2-MTM\" = sp1_mtm, \"1-Raw pgram\" = sp1\n))\n\n\n\n\n\n\n\npar(mfrow = c(1,2))\nacf(sp1$spec / true_spec, lag.max = 10)\nacf(sp1_mtm$spec / true_spec, lag.max = 10)\n\n\n\n\n\n\n\npar(mfrow = c(1,1))\n\nFor the MTM method with the default 3 tapers, the degrees of freedom are not the same for all frequencies, and on average decline slightly with frequency.\n\nplot(sp1_mtm$freq, sp1_mtm$dof, type = \"l\")\n\n\n\n\n\n\n\nmean_dof &lt;- mean(sp1_mtm$dof)\nmean_dof\n\n[1] 5.340926\n\n\nThe distribution of the errors is still approximately gamma with shape equal to the mean degrees of freedom, but the errors are now serially correlated with each other.\n\nhist(sp1_mtm$spec / true_spec, freq = FALSE, ylim = c(0, 1), breaks = 15)\nxax &lt;- seq(-1, 5, length.out = 1000)\nlines(xax, dgamma(xax, mean_dof, scale = 1/mean_dof), col = \"red\")",
+    "crumbs": [
+      "Estimating power spectra",
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Distribution of spectral power estimates</span>"
     ]
   },
   {
     "objectID": "variance.html",
     "href": "variance.html",
-    "title": "5  Variance from a powerspectrum",
+    "title": "6  Variance from a power spectrum",
     "section": "",
-    "text": "5.1 Variance by timescale\nAs we simulated a “white” timeseries, the total variance of the timeseries is spread equally across all frequencies. Therefore the integrals of the low and upper halves of the power spectrum are expected to be equal and sum to the variance of the whole timeseries.\nPaleoSpec has a function GetVarFromSpectra which we will use to integrate sections of the power spectrum\nf_range &lt;- c(1/N, 1/2)\nf_range_low &lt;- c(1/N, mean(f_range))\nf_range_high &lt;- c(mean(f_range), 1/2)\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range)\n\n$var\n[1] 25.63878\n\n$dof\n[1] 959.4585\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_low)\n\n$var\n[1] 12.97496\n\n$dof\n[1] 481.1547\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_high)\n\n$var\n[1] 12.66096\n\n$dof\n[1] 478.2898\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_low)$var +\nPaleoSpec::GetVarFromSpectra(sp1, f_range_high)$var\n\n[1] 25.63592",
+    "text": "6.1 Variance by timescale\nAs we simulated a “white” time series, the total variance of the time series is spread equally across all frequencies. Therefore the integrals of the lower and upper halves of the power spectrum are expected to be equal to each other and sum to the variance of the whole time series.\nPaleoSpec has a function GetVarFromSpectra() which we will use to integrate sections of the power spectrum\nf_range &lt;- c(1/N, 1/2)\nf_range_low &lt;- c(1/N, mean(f_range))\nf_range_high &lt;- c(mean(f_range), 1/2)\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range)\n\n$var\n[1] 25.63878\n\n$dof\n[1] 959.4585\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_low)\n\n$var\n[1] 12.97496\n\n$dof\n[1] 481.1547\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_high)\n\n$var\n[1] 12.66096\n\n$dof\n[1] 478.2898\n\nPaleoSpec::GetVarFromSpectra(sp1, f_range_low)$var +\nPaleoSpec::GetVarFromSpectra(sp1, f_range_high)$var\n\n[1] 25.63592",
     "crumbs": [
       "Variance",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Variance from a powerspectrum</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Variance from a power spectrum</span>"
     ]
   }
 ]
