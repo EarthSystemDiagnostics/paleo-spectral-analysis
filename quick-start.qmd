@@ -2,7 +2,7 @@
 # Quick intro to PaleoSpec
 
 
-PaleoSpec is an R package to assist in the spectral analysis of timeseries, in particular timeseries of climate variables from observational, model, and proxy paleoclimate data sources. PaleoSpec contains functions to analyse existing timeseries and to generate timeseries with specific spectral properties.
+PaleoSpec is an R package to assist in the spectral analysis of time series, in particular time series of climate variables from observational, model, and proxy paleoclimate data sources. PaleoSpec contains functions to analyse existing time series and to generate time series with specific spectral properties.
 
 
 ## Installation
@@ -20,9 +20,9 @@ https://earthsystemdiagnostics.github.io/paleospec/reference/index.html
 
 
 ## Usage
-`SpecMTM` can be used to estimate the power spectrum of a timeseries using the multitaper method.
+`SpecMTM` can be used to estimate the power spectrum of a time series using the multitaper method.
 
-Here we estimate the spectrum of the monthly sunspot data that comes with R. The sunspot data are already a timeseries object so SpecMTM knows the correct frequency of the observations. We can plot the power spectrum with the PaleoSpec function LPlot.
+Here we estimate the spectrum of the monthly sunspot data that comes with R. The sunspot data are already a time series object so SpecMTM knows the correct frequency of the observations. We can plot the power spectrum with the PaleoSpec function LPlot.
 
 ```{r}
 sunspot <- datasets::sunspot.month
@@ -50,9 +50,9 @@ gg_spec(sp_sun)
 
 
 
-### Simulating timeseries with given spectral properties
+### Simulating time series with given spectral properties
 
-`SimPLS` can be used to create a timeseries whose power spectrum has powerlaw like properties, 
+`SimPLS` can be used to create a time series whose power spectrum has powerlaw like properties, 
 where: $S(f) = \alpha f^{-\beta}$ 
 
 ```{r}
@@ -71,7 +71,7 @@ ts1 <- SimPLS(N = N, b = beta, a = alpha)
 plot(ts1, type = "l")
 ```
 
-`SpecMTM` can again be used to estimate the power spectrum using the multitaper method. If we convert the vector from SimPLS to a timeseries object, and add information about the sampling frequency of the timeseries then SpecMTM will have the correct frequency axis.
+`SpecMTM` can again be used to estimate the power spectrum using the multitaper method. If we convert the vector from SimPLS to a time series object, and add information about the sampling frequency of the time series then SpecMTM will have the correct frequency axis.
 
 ```{r}
 sp1 <- SpecMTM(ts(ts1, deltat = 1))

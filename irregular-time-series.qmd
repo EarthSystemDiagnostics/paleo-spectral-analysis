@@ -1,4 +1,4 @@
-# Irregular time-series
+# Irregular time series
 
 ## Interpolation
 

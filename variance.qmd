@@ -1,6 +1,6 @@
-# Variance from a powerspectrum
+# Variance from a power spectrum
 
-The integral of the full power spectrum is equal to the variance of the whole timeseries. We can calculate this by summing the spectral estimates and multiplying by delta_f. 
+The integral of the full power spectrum is equal to the variance of the whole time series. We can calculate this by summing the spectral estimates and multiplying by delta_f. 
 
 
 ```{r setup}
@@ -34,9 +34,9 @@ Why are these not identical?
 
 ## Variance by timescale
 
-As we simulated a "white" timeseries, the total variance of the timeseries is spread equally across all frequencies. Therefore the integrals of the low and upper halves of the power spectrum are expected to be equal and sum to the variance of the whole timeseries.
+As we simulated a "white" time series, the total variance of the time series is spread equally across all frequencies. Therefore the integrals of the lower and upper halves of the power spectrum are expected to be equal to each other and sum to the variance of the whole time series.
 
-PaleoSpec has a function `GetVarFromSpectra` which we will use to integrate sections of the power spectrum
+PaleoSpec has a function `GetVarFromSpectra()` which we will use to integrate sections of the power spectrum
 
 ```{r}
 

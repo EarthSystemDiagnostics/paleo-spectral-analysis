@@ -1,0 +1,99 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Regular time series
+
+If a time series is "regular", that is it has equal time steps between observations, and no missing observations, then its power spectrum can be estimated from its Fourier transform. 
+
+
+## The Fourier Transform
+
+```{r}
+sunspot <- datasets::sunspot.month
+plot(sunspot)
+```
+
+```{r}
+library(PaleoSpec)
+sp_sun <- SpecMTM(sunspot)
+LPlot(sp_sun)
+```
+
+
+## The Multitaper Method
+
+
+
+## To detrend or not 
+
+- Even with detrend = FALSE, SpecMTM does some detrending - must be part of the tapering?
+
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(PaleoSpec)
+library(ggplot2)
+
+
+N <- 1e03
+n_rep <- 100
+alpha = 0.1
+beta = 0
+
+dat <- crossing(
+  rep = 1:n_rep,
+  t = 1:N
+) %>% 
+  group_by(rep) %>% 
+  mutate(
+    y = PaleoSpec::SimPLS(N = N, beta = beta, alpha = alpha) 
+  )
+
+
+specs <- dat %>% 
+  group_by(rep) %>% 
+  do({
+    Spec2DF(SpecMTM(ts(.$y), 
+                    detrend = TRUE
+                    )
+            )
+  })
+
+# specs <- dat %>% 
+#   group_by(rep) %>% 
+#   do({
+#     Spec2DF(SpecACF(ts(.$y), bin.width = 1,
+#                     detrend = FALSE, 
+#                     #K = 0, nw = 1
+#                     )
+#             )
+#   })
+
+
+
+mean_spec <- specs %>% 
+  group_by(freq) %>% 
+  summarise_if(is.numeric, mean)
+
+
+mean_spec %>% 
+  as_spec_df() %>% 
+  gg_spec() +
+  #geom_point() +
+  geom_abline(intercept = log10(alpha), slope = -beta, colour = "red") #+
+  #expand_limits(y = 100)
+```
+
+
+
+
+## Errors
+
+- Explain Gamma / Chi-Sq nature of the errors
+- Degrees of freedom / shape of Gamma
+- Effect of tapering and smoothing on error distribution
+- Confidence intervals
+
