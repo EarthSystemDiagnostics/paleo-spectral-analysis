@@ -9,14 +9,14 @@ book:
     - index.qmd
     - intro.qmd
     - quick-start.qmd
-    - part: Estimating powerspectra
+    - part: Estimating power spectra
       chapters:
-        - regular-timeseries.qmd
-        - irregular-timeseries.qmd
+        - regular-time-series.qmd
+        - irregular-time-series.qmd
     - part: Variance
       chapters:
         - variance.qmd
-    - part: Simulating Timeseries
+    - part: Simulating time series
     - references.qmd
 
 bibliography: references.bib
