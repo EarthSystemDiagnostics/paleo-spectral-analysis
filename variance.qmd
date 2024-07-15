@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 # Variance from a power spectrum
 
 The integral of the full power spectrum is equal to the variance of the whole time series. We can calculate this by summing the spectral estimates and multiplying by delta_f. 
@@ -54,3 +59,36 @@ PaleoSpec::GetVarFromSpectra(sp1, f_range_low)$var +
 PaleoSpec::GetVarFromSpectra(sp1, f_range_high)$var
 
 ```
+
+
+In contrast, if we simulated a time series where the variance increases with timescale, integrating different parts of its power spectrum will yield different variances.
+
+
+```{r}
+ts2 <- ts(PaleoSpec::SimPLS(N, beta = 1, alpha = 0.1))
+plot(ts2)
+
+sp2 <- SpecMTM(ts2)
+
+gg_spec(sp2)  +
+  scale_x_continuous()+
+  geom_vline(xintercept = mean(f_range), colour = "red")
+
+
+var_low_2 <- PaleoSpec::GetVarFromSpectra(sp2, f_range_low)
+var_high_2 <- PaleoSpec::GetVarFromSpectra(sp2, f_range_high)
+
+var_low_2
+var_high_2
+```
+
+The sum of the two variances calculated by integrating the two halves of the power spectrum should still be equal to the total variance of the time series.
+
+```{r}
+var_low_2$var + var_high_2$var
+var(ts2)
+```
+
+When a time series has increasing power at lower frequencies, the variance estimated from the power spectrum will be lower than the true variance, because the detrending of the time series prior to estimating the power spectrum removes power from the lowest frequencies. See @sec-detrend .
+
+

@@ -26,7 +26,7 @@ LPlot(sp_sun)
 
 
 
-## To detrend or not 
+## To detrend or not {#sec-detrend}
 
 - Even with detrend = FALSE, SpecMTM does some detrending - must be part of the tapering?
 
@@ -39,21 +39,28 @@ library(ggplot2)
 
 
 N <- 1e03
-n_rep <- 100
+n_rep <- 1000
 alpha = 0.1
 beta = 0
 
 dat <- crossing(
   rep = 1:n_rep,
   t = 1:N
-) %>% 
-  group_by(rep) %>% 
-  mutate(
-    y = PaleoSpec::SimPLS(N = N, beta = beta, alpha = alpha) 
-  )
+) #%>% 
+  # group_by(rep) %>% 
+  # mutate(
+  #   y = PaleoSpec::SimPLS(N = N, beta = beta, alpha = alpha) 
+  # )
 
+# Get a matrix of simulated timeseries
+ts_m <- replicate(n_rep, PaleoSpec::SimPLS(N = N, beta = beta, alpha = alpha))
 
-specs <- dat %>% 
+mean_spec <- SpecACF(ts_m, bin.width = 1, detrend = FALSE)
+mean_spec_detrended <- SpecACF(ts_m, bin.width = 1)
+
+dat$y <- as.numeric(ts_m)
+
+specs_mtm_detrend <- dat %>% 
   group_by(rep) %>% 
   do({
     Spec2DF(SpecMTM(ts(.$y), 
@@ -62,29 +69,29 @@ specs <- dat %>%
             )
   })
 
-# specs <- dat %>% 
-#   group_by(rep) %>% 
-#   do({
-#     Spec2DF(SpecACF(ts(.$y), bin.width = 1,
-#                     detrend = FALSE, 
-#                     #K = 0, nw = 1
-#                     )
-#             )
-#   })
+specs_mtm_raw <- dat %>% 
+  group_by(rep) %>% 
+  do({
+    Spec2DF(SpecMTM(ts(.$y), 
+                    detrend = FALSE
+                    )
+            )
+  })
 
 
-
-mean_spec <- specs %>% 
+mean_spec_MTM_raw <- specs_mtm_raw %>% 
   group_by(freq) %>% 
   summarise_if(is.numeric, mean)
 
+mean_spec_MTM_detrended <- specs_mtm_detrend %>% 
+  group_by(freq) %>% 
+  summarise_if(is.numeric, mean)
 
-mean_spec %>% 
-  as_spec_df() %>% 
-  gg_spec() +
-  #geom_point() +
-  geom_abline(intercept = log10(alpha), slope = -beta, colour = "red") #+
-  #expand_limits(y = 100)
+gg_spec(list("Periodogram_raw_ts" = mean_spec,
+             "Periodogram_detrended_ts" = mean_spec_detrended,
+             MTM_detrended = mean_spec_MTM_detrended,
+             MTM_raw_ts = mean_spec_MTM_raw)) #+
+  #geom_point(aes(x = freq, y = spec, colour = spec_id))
 ```
 
 
