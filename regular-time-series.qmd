@@ -35,6 +35,7 @@ LPlot(sp_sun)
 
 ```{r}
 library(dplyr)
+library(tidyr)
 library(PaleoSpec)
 library(ggplot2)
 
@@ -43,6 +44,8 @@ f2 <- 1/100
 f3 <- 1/1000
 
 tau <- 1e04
+
+#tau / (1/c(f1, f2, f3))
 
 dat <- tibble(
   time = seq(0, tau, by = 1),
@@ -76,16 +79,21 @@ sp1_0.5k_detr <- SpecACF(ts(dat$y[1:500], deltat = 1), bin.width = 1, detrend = 
 sp1_0.5k_detr_MTM <- SpecMTM(ts(dat$y[1:500], deltat = 1), detrend =  TRUE)
 
 
-#sp1 <- SpecACF(ts(dat$y, deltat = 1), bin.width = 1, detrend =  FALSE)
-
-
-gg_spec(list(
-  raw_10k = sp1_10k, detrended_10K = sp1_10k_detr,
-  raw_0.5k = sp1_0.5k, detrended_0.5K = sp1_0.5k_detr,
-  detrended_0.5k_MTM = sp1_0.5k_detr_MTM
-  )) +
-  geom_vline(xintercept = c(f1, f2, f3), lty = 2, colour =  "Red")
-
+list(
+  raw_10k = (sp1_10k),
+  detrended_10k = (sp1_10k_detr),
+  raw_0.5k = (sp1_0.5k), 
+  detrended_0.5k = (sp1_0.5k_detr)
+  #detrended_0.5k_MTM = (sp1_0.5k_detr_MTM)
+  ) %>% 
+  lapply(., Spec2DF) %>% 
+  bind_rows(., .id = "name") %>% 
+  separate(name, into = c("detrended", "length"), sep = "_") %>% 
+  mutate(spec_id = detrended) %>% 
+  as_spec_df() %>% 
+  gg_spec(., colour = detrended) +
+  facet_wrap(~length)#+
+  #geom_vline(xintercept = c(f1, f2, f3), lty = 2, colour =  "blue")
 
 
 ```
