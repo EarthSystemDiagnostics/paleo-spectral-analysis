@@ -10,20 +10,58 @@ If a time series is "regular", that is it has equal time steps between observati
 
 ## The Fourier Transform
 
+Here we will use the Fast Fourier Transform function in base R to calculate the periodogram ourselves from the Fourier transform of a time series, just to see how it is done.
+
 ```{r}
 sunspot <- datasets::sunspot.month
 plot(sunspot)
 ```
 
 ```{r}
-library(PaleoSpec)
-sp_sun <- SpecMTM(sunspot)
-LPlot(sp_sun)
+fft_sun <- fft(as.numeric(sunspot))
+str(fft_sun)
 ```
+
+`fft` returns a vector of complex numbers.
+
+```{r}
+delta_t <- 1/12
+spec <- abs(fft_sun)^2 * (delta_t/length(sunspot))
+freq <- (0:(length(sunspot)-1)) / (delta_t * length(sunspot))
+```
+
+This contains both the positive and negative frequencies
+
+
+```{r}
+spec_sun <- tibble(
+  freq = freq,
+  spec = spec
+) %>% 
+  filter(freq < 6, freq > 0) %>% 
+  as.spec()
+
+LPlot(spec_sun)
+abline(v = 1/11, col = "green")
+
+gg_spec(list(
+  SpecACF = SpecACF(sunspot, bin.width = 1/12, detrend = FALSE),
+  SpecMTM = SpecMTM(sunspot, detrend = FALSE),
+  FFT = spec_sun)
+  ) +
+  geom_vline(xintercept = 1/11)
+```
+
+
 
 
 ## The Multitaper Method
 
+```{r}
+library(PaleoSpec)
+sp_sun <- SpecMTM(sunspot)
+LPlot(sp_sun)
+```
 
 
 ## To detrend or not {#sec-detrend}
