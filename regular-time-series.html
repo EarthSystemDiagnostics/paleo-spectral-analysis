@@ -226,7 +226,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#the-fourier-transform" id="toc-the-fourier-transform" class="nav-link active" data-scroll-target="#the-fourier-transform"><span class="header-section-number">3.1</span> The Fourier Transform</a></li>
   <li><a href="#the-multitaper-method" id="toc-the-multitaper-method" class="nav-link" data-scroll-target="#the-multitaper-method"><span class="header-section-number">3.2</span> The Multitaper Method</a></li>
-  <li><a href="#to-detrend-or-not" id="toc-to-detrend-or-not" class="nav-link" data-scroll-target="#to-detrend-or-not"><span class="header-section-number">3.3</span> To detrend or not</a></li>
+  <li><a href="#sec-detrend" id="toc-sec-detrend" class="nav-link" data-scroll-target="#sec-detrend"><span class="header-section-number">3.3</span> To detrend or not</a>
+  <ul class="collapse">
+  <li><a href="#why-detrend" id="toc-why-detrend" class="nav-link" data-scroll-target="#why-detrend"><span class="header-section-number">3.3.1</span> Why detrend?</a></li>
+  </ul></li>
   <li><a href="#errors" id="toc-errors" class="nav-link" data-scroll-target="#errors"><span class="header-section-number">3.4</span> Errors</a></li>
   </ul>
 </nav>
@@ -283,11 +286,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-multitaper-method" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="the-multitaper-method"><span class="header-section-number">3.2</span> The Multitaper Method</h2>
 </section>
-<section id="to-detrend-or-not" class="level2" data-number="3.3">
-<h2 data-number="3.3" class="anchored" data-anchor-id="to-detrend-or-not"><span class="header-section-number">3.3</span> To detrend or not</h2>
-<ul>
-<li>Even with detrend = FALSE, SpecMTM does some detrending - must be part of the tapering?</li>
-</ul>
+<section id="sec-detrend" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-detrend"><span class="header-section-number">3.3</span> To detrend or not</h2>
+<section id="why-detrend" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="why-detrend"><span class="header-section-number">3.3.1</span> Why detrend?</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -308,57 +310,21 @@ Attaching package: 'dplyr'</code></pre>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(PaleoSpec)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fl">1e03</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>n_rep <span class="ot">&lt;-</span> <span class="dv">100</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">=</span> <span class="fl">0.1</span></span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">10</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>f2 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">100</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>f3 <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">1000</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>tau <span class="ot">&lt;-</span> <span class="fl">1e04</span></span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">crossing</span>(</span>
-<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">rep =</span> <span class="dv">1</span><span class="sc">:</span>n_rep,</span>
-<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">t =</span> <span class="dv">1</span><span class="sc">:</span>N</span>
-<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(rep) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> PaleoSpec<span class="sc">::</span><span class="fu">SimPLS</span>(<span class="at">N =</span> N, <span class="at">beta =</span> beta, <span class="at">alpha =</span> alpha) </span>
-<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>specs <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
-<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(rep) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do</span>({</span>
-<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Spec2DF</span>(<span class="fu">SpecMTM</span>(<span class="fu">ts</span>(.<span class="sc">$</span>y), </span>
-<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>                    <span class="at">detrend =</span> <span class="cn">TRUE</span></span>
-<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>                    )</span>
-<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>            )</span>
-<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>  })</span>
-<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="co"># specs &lt;- dat %&gt;% </span></span>
-<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(rep) %&gt;% </span></span>
-<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a><span class="co">#   do({</span></span>
-<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a><span class="co">#     Spec2DF(SpecACF(ts(.$y), bin.width = 1,</span></span>
-<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a><span class="co">#                     detrend = FALSE, </span></span>
-<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a><span class="co">#                     #K = 0, nw = 1</span></span>
-<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a><span class="co">#                     )</span></span>
-<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a><span class="co">#             )</span></span>
-<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a><span class="co">#   })</span></span>
-<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>mean_spec <span class="ot">&lt;-</span> specs <span class="sc">%&gt;%</span> </span>
-<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(freq) <span class="sc">%&gt;%</span> </span>
-<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_if</span>(is.numeric, mean)</span>
-<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>mean_spec <span class="sc">%&gt;%</span> </span>
-<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_spec_df</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gg_spec</span>() <span class="sc">+</span></span>
-<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>  <span class="co">#geom_point() +</span></span>
-<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">intercept =</span> <span class="fu">log10</span>(alpha), <span class="at">slope =</span> <span class="sc">-</span>beta, <span class="at">colour =</span> <span class="st">"red"</span>) <span class="co">#+</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Scale for colour is already present.
-Adding another scale for colour, which will replace the existing scale.</code></pre>
-</div>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co">#tau / (1/c(f1, f2, f3))</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">time =</span> <span class="fu">seq</span>(<span class="dv">0</span>, tau, <span class="at">by =</span> <span class="dv">1</span>),</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> <span class="fu">cos</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>f1<span class="sc">*</span>time) <span class="sc">+</span> <span class="fu">cos</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>f2<span class="sc">*</span>time) <span class="sc">+</span> <span class="fu">cos</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>f3<span class="sc">*</span>time) </span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">y =</span> y <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="fu">n</span>(), <span class="dv">0</span>, <span class="fl">0.1</span>))</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(dat<span class="sc">$</span>time, dat<span class="sc">$</span>y, <span class="at">type =</span> <span class="st">"l"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -366,8 +332,135 @@ Adding another scale for colour, which will replace the existing scale.</code></
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#expand_limits(y = 100)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>sp1 <span class="ot">&lt;-</span> <span class="fu">SpecMTM</span>(<span class="fu">ts</span>(dat<span class="sc">$</span>y, <span class="at">deltat =</span> <span class="dv">1</span>), <span class="at">detrend =</span>  <span class="cn">FALSE</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>sp1_detr <span class="ot">&lt;-</span> <span class="fu">SpecMTM</span>(<span class="fu">ts</span>(dat<span class="sc">$</span>y, <span class="at">deltat =</span> <span class="dv">1</span>), <span class="at">detrend =</span>  <span class="cn">TRUE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#sp1 &lt;- SpecACF(ts(dat$y, deltat = 1), bin.width = 1, detrend =  FALSE)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_spec</span>(<span class="fu">list</span>(sp1, <span class="at">detrended =</span> sp1_detr)) <span class="sc">+</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(f1, f2, f3), <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">colour =</span>  <span class="st">"Red"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="regular-time-series_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sp1_10k <span class="ot">&lt;-</span> <span class="fu">SpecACF</span>(<span class="fu">ts</span>(dat<span class="sc">$</span>y, <span class="at">deltat =</span> <span class="dv">1</span>), <span class="at">bin.width =</span> <span class="dv">1</span>, <span class="at">detrend =</span>  <span class="cn">FALSE</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>sp1_10k_detr <span class="ot">&lt;-</span> <span class="fu">SpecACF</span>(<span class="fu">ts</span>(dat<span class="sc">$</span>y, <span class="at">deltat =</span> <span class="dv">1</span>), <span class="at">bin.width =</span> <span class="dv">1</span>, <span class="at">detrend =</span>  <span class="cn">TRUE</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(y<span class="sc">~</span>time, <span class="at">data =</span> dat[<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>,],  <span class="at">type =</span> <span class="st">"l"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="regular-time-series_files/figure-html/unnamed-chunk-3-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>sp1_0<span class="fl">.5</span>k <span class="ot">&lt;-</span> <span class="fu">SpecACF</span>(<span class="fu">ts</span>(dat<span class="sc">$</span>y[<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>], <span class="at">deltat =</span> <span class="dv">1</span>), <span class="at">bin.width =</span> <span class="dv">1</span>, <span class="at">detrend =</span>  <span class="cn">FALSE</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>sp1_0<span class="fl">.5</span>k_detr <span class="ot">&lt;-</span> <span class="fu">SpecACF</span>(<span class="fu">ts</span>(dat<span class="sc">$</span>y[<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>], <span class="at">deltat =</span> <span class="dv">1</span>), <span class="at">bin.width =</span> <span class="dv">1</span>, <span class="at">detrend =</span>  <span class="cn">TRUE</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>sp1_0<span class="fl">.5</span>k_detr_MTM <span class="ot">&lt;-</span> <span class="fu">SpecMTM</span>(<span class="fu">ts</span>(dat<span class="sc">$</span>y[<span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>], <span class="at">deltat =</span> <span class="dv">1</span>), <span class="at">detrend =</span>  <span class="cn">TRUE</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">raw_10k =</span> (sp1_10k),</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">detrended_10k =</span> (sp1_10k_detr),</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">raw_0.5k =</span> (sp1_0<span class="fl">.5</span>k), </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">detrended_0.5k =</span> (sp1_0<span class="fl">.5</span>k_detr)</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  <span class="co">#detrended_0.5k_MTM = (sp1_0.5k_detr_MTM)</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">lapply</span>(., Spec2DF) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(., <span class="at">.id =</span> <span class="st">"name"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">separate</span>(name, <span class="at">into =</span> <span class="fu">c</span>(<span class="st">"detrended"</span>, <span class="st">"length"</span>), <span class="at">sep =</span> <span class="st">"_"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">spec_id =</span> detrended) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_spec_df</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gg_spec</span>(., <span class="at">colour =</span> detrended) <span class="sc">+</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>length)<span class="co">#+</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="regular-time-series_files/figure-html/unnamed-chunk-3-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#geom_vline(xintercept = c(f1, f2, f3), lty = 2, colour =  "blue")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>Even with detrend = FALSE, SpecMTM does some detrending - must be part of the tapering?</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(PaleoSpec)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fl">1e03</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>n_rep <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>alpha <span class="ot">=</span> <span class="fl">0.1</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>dat <span class="ot">&lt;-</span> <span class="fu">crossing</span>(</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">rep =</span> <span class="dv">1</span><span class="sc">:</span>n_rep,</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">t =</span> <span class="dv">1</span><span class="sc">:</span>N</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>) <span class="co">#%&gt;% </span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># group_by(rep) %&gt;% </span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># mutate(</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  <span class="co">#   y = PaleoSpec::SimPLS(N = N, beta = beta, alpha = alpha) </span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># )</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Get a matrix of simulated timeseries</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>ts_m <span class="ot">&lt;-</span> <span class="fu">replicate</span>(n_rep, PaleoSpec<span class="sc">::</span><span class="fu">SimPLS</span>(<span class="at">N =</span> N, <span class="at">beta =</span> beta, <span class="at">alpha =</span> alpha))</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>mean_spec <span class="ot">&lt;-</span> <span class="fu">SpecACF</span>(ts_m, <span class="at">bin.width =</span> <span class="dv">1</span>, <span class="at">detrend =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>mean_spec_detrended <span class="ot">&lt;-</span> <span class="fu">SpecACF</span>(ts_m, <span class="at">bin.width =</span> <span class="dv">1</span>)</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>dat<span class="sc">$</span>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(ts_m)</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>specs_mtm_detrend <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(rep) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do</span>({</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Spec2DF</span>(<span class="fu">SpecMTM</span>(<span class="fu">ts</span>(.<span class="sc">$</span>y), </span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>                    <span class="at">detrend =</span> <span class="cn">TRUE</span></span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>                    )</span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>specs_mtm_raw <span class="ot">&lt;-</span> dat <span class="sc">%&gt;%</span> </span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(rep) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">do</span>({</span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a>    <span class="fu">Spec2DF</span>(<span class="fu">SpecMTM</span>(<span class="fu">ts</span>(.<span class="sc">$</span>y), </span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>                    <span class="at">detrend =</span> <span class="cn">FALSE</span></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a>                    )</span>
+<span id="cb12-44"><a href="#cb12-44" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb12-45"><a href="#cb12-45" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb12-46"><a href="#cb12-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-47"><a href="#cb12-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-48"><a href="#cb12-48" aria-hidden="true" tabindex="-1"></a>mean_spec_MTM_raw <span class="ot">&lt;-</span> specs_mtm_raw <span class="sc">%&gt;%</span> </span>
+<span id="cb12-49"><a href="#cb12-49" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(freq) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-50"><a href="#cb12-50" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_if</span>(is.numeric, mean)</span>
+<span id="cb12-51"><a href="#cb12-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-52"><a href="#cb12-52" aria-hidden="true" tabindex="-1"></a>mean_spec_MTM_detrended <span class="ot">&lt;-</span> specs_mtm_detrend <span class="sc">%&gt;%</span> </span>
+<span id="cb12-53"><a href="#cb12-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(freq) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-54"><a href="#cb12-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise_if</span>(is.numeric, mean)</span>
+<span id="cb12-55"><a href="#cb12-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-56"><a href="#cb12-56" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_spec</span>(<span class="fu">list</span>(<span class="st">"Periodogram_raw_ts"</span> <span class="ot">=</span> mean_spec,</span>
+<span id="cb12-57"><a href="#cb12-57" aria-hidden="true" tabindex="-1"></a>             <span class="st">"Periodogram_detrended_ts"</span> <span class="ot">=</span> mean_spec_detrended,</span>
+<span id="cb12-58"><a href="#cb12-58" aria-hidden="true" tabindex="-1"></a>             <span class="at">MTM_detrended =</span> mean_spec_MTM_detrended,</span>
+<span id="cb12-59"><a href="#cb12-59" aria-hidden="true" tabindex="-1"></a>             <span class="at">MTM_raw_ts =</span> mean_spec_MTM_raw)) <span class="co">#+</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="regular-time-series_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>  <span class="co">#geom_point(aes(x = freq, y = spec, colour = spec_id))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 <section id="errors" class="level2" data-number="3.4">
 <h2 data-number="3.4" class="anchored" data-anchor-id="errors"><span class="header-section-number">3.4</span> Errors</h2>
