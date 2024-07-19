@@ -39,6 +39,10 @@ Here we will once plot the negative, zeroth, and positive frequencies together, 
 
 
 ```{r}
+library(dplyr)
+library(PaleoSpec)
+library(ggplot2)
+
 N <- length(sunspot)
 
 pos_freq <- seq(1 / (delta_t * N), 1/(2*delta_t), by = 1 / (delta_t * N))
