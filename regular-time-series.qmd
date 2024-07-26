@@ -10,7 +10,10 @@ If a time series is "regular", that is it has equal time steps between observati
 
 ## The Fourier Transform
 
-Here we will use the Fast Fourier Transform function in base R to calculate the periodogram ourselves from the Fourier transform of a time series, just to see how it is done.
+In this section we will avoid using any of the specialist functions provided by PaleoSpec, we will use the Fast Fourier Transform function in base R to calculate the periodogram ourselves from the Fourier transform of a time series, just to see how it is done. 
+
+
+We will look at the power spectrum of the monthly numbers of sunspots in the `sunspots.monthly` dataset in the `datasets` package that comes with a default R installation.
 
 
 ```{r}
@@ -18,43 +21,49 @@ sunspot <- datasets::sunspot.month
 plot(sunspot)
 ```
 
+The data are documented in a help file.
+
+```{r, eval=FALSE}
+?datasets::sunspot.month
+```
+
+
+
 ```{r}
 fft_sun <- fft(as.numeric(sunspot))
 str(fft_sun)
 ```
 
-`fft` returns a vector of complex numbers corresponding to the magnitude and phase of variation at a set of 'Fourier' frequencies. To obtain the periodogram we take the square of the absolute value of these complex numbers, discarding the complex part containing the phase information.
+`fft` returns a vector of complex numbers corresponding to the magnitude and phase of variation at a set of 'Fourier' frequencies. To obtain the periodogram we take the square of the absolute value of these complex numbers, discarding the imaginary part containing the phase information.
 
 ```{r}
-# Delta t, the time interval between observations, here 1 month, so 1/12 of a year
+# Delta t, the time interval between observations, here 1 month, 
+# so 1/12 of a year
+N <- length(sunspot)
 delta_t <- 1/12
-spec <- abs(fft_sun)^2 * (delta_t/length(sunspot))
+spec <- abs(fft_sun)^2 * (delta_t/N)
 ```
 
 Typically, we are only interested in the positive Fourier frequencies, which run from the lowest resolved positive frequency 1 / (delta_t * N), where N is the length of the timeseries, up to the highest resolved frequency, the Nyquist frequency 1/(2 * delta_t), with the distance between frequencies, delta_f, also equal to 1/(delta_t * N). 
+```{r}
+pos_freq <- seq(1 / (delta_t * N), 1/(2*delta_t), by = 1 / (delta_t * N))
+```
+
 
 However, the Fourier transform also returns values for the 'zeroth' frequency, and for a set of negative frequencies. For a transform of a time series of real numbers, the values at the negative frequencies are identical to the positive frequencies, so they contain no additional information.
 
-Here we will once plot the negative, zeroth, and positive frequencies together, but later we will only consider the positive frequencies.
-
+Here we will once plot the negative, zeroth, and positive frequencies together; later we will only consider the positive frequencies.
 
 ```{r}
-library(dplyr)
-library(PaleoSpec)
-library(ggplot2)
-
-N <- length(sunspot)
-
-pos_freq <- seq(1 / (delta_t * N), 1/(2*delta_t), by = 1 / (delta_t * N))
-
 freq <- c(0, pos_freq, -rev(pos_freq))
 
-spec_sun <- tibble(
+spec_sun <- data.frame(
   freq = freq,
-  spec = spec,
-  dof = 2
-) %>% 
-  arrange(desc(freq))
+  spec = spec
+) 
+
+# re-order by frequency to make the plot neater
+spec_sun <- spec_sun[order(spec_sun$freq), ]
 
 plot(spec~freq, data = spec_sun, type = "l", log = "y")
 ```
@@ -63,32 +72,15 @@ plot(spec~freq, data = spec_sun, type = "l", log = "y")
 Now we will discard all frequencies less than and equal to zero and re-plot on log-log axes. We will also compare our result to R's built in function to estimate periodograms. 
 
 ```{r}
-spec_sun_fft <- spec_sun %>% 
-  filter(freq > 0) %>% 
-  PaleoSpec::as.spec()
+spec_sun_fft <- subset(spec_sun, freq > 0) 
 
 spec_sun_pgram <- spec.pgram(sunspots, plot = FALSE)
-spec_sun_pgram$dof <- spec_sun_pgram$df
 
-gg_spec(list(
-  pgram = spec_sun_pgram,
-  fft = spec_sun)
-  ) +
-  geom_vline(xintercept = 1/11)
-
-
-gg_spec(list(
-  pgram = FilterSpecLog(spec_sun_pgram, df.log = 0.01),
-  fft = FilterSpecLog(spec_sun_fft, df.log = 0.01))
-  ) +
-  geom_vline(xintercept = 1/c(11, 5.5))
-
-
-glm1 <- glm(spec ~ log(freq), family = Gamma(link = "log"), data = Spec2DF(spec_sun_fft))
-
-gg_spec(FilterSpec(spec_sun_fft, spans = c(3, 5, 7))) +
-  geom_abline(intercept = log(coef(glm1)[1]), slope = coef(glm1)[2], col = "red")
-
+plot(spec~freq, data = spec_sun_fft, type = "l", log = "xy", col = "blue")
+# the output from spec.pgram is a list not a dataframe
+lines(spec_sun_pgram$freq, spec_sun_pgram$spec, col = "green")
+abline(v = 1/11)
+legend("topright", legend = c("fft", "pgram"), col = c("blue", "green"), lty = c(1,1))
 ```
 
 
@@ -99,7 +91,10 @@ gg_spec(FilterSpec(spec_sun_fft, spans = c(3, 5, 7))) +
 ```{r}
 library(PaleoSpec)
 sp_sun <- SpecMTM(sunspot)
-LPlot(sp_sun)
+LPlot(spec_sun_fft, col = "blue")
+LLines(spec_sun_pgram, col = "green")
+LLines(sp_sun, col = "red")
+legend("topright", legend = c("fft", "pgram", "MTM"), col = c("blue", "green", "red"), lty = c(1,1, 1))
 ```
 
 
@@ -107,8 +102,6 @@ LPlot(sp_sun)
 
 
 ### Why detrend?
-
-
 
 ```{r}
 library(dplyr)
@@ -244,6 +237,33 @@ gg_spec(list("Periodogram_raw_ts" = mean_spec,
   #geom_point(aes(x = freq, y = spec, colour = spec_id))
 ```
 
+
+
+
+```{r}
+## Significance of peaks
+
+# gg_spec(list(
+#   pgram = FilterSpecLog(spec_sun_pgram, df.log = 0.01),
+#   fft = FilterSpecLog(spec_sun_fft, df.log = 0.01))
+#   ) +
+#   geom_vline(xintercept = 1/c(11, 5.5))
+# 
+# 
+# glm1 <- glm(spec ~ log(freq), family = Gamma(link = "log"), data = Spec2DF(spec_sun_fft))
+# 
+# gg_spec(FilterSpec(spec_sun_fft, spans = c(3, 5, 7))) +
+#   geom_abline(intercept = log(coef(glm1)[1]), slope = coef(glm1)[2], col = "red")
+```
+
+```{r}
+## Value at f = 0 is the mean
+# abs(fft_sun[1]) / length(sunspot)
+# sqrt(spec[1] * N/delta_t) / length(sunspot)
+# mean(sunspot)
+
+# must remove mean if padding or you will get spectral leakage from freq zero
+```
 
 
 
