@@ -124,49 +124,76 @@ dat <- tibble(
   mutate(y = y + rnorm(n(), 0, 0.1))
 
 plot(dat$time, dat$y, type = "l")
+```
 
 
-sp1 <- SpecMTM(ts(dat$y, deltat = 1), detrend =  FALSE)
-sp1_detr <- SpecMTM(ts(dat$y, deltat = 1), detrend =  TRUE)
-
-#sp1 <- SpecACF(ts(dat$y, deltat = 1), bin.width = 1, detrend =  FALSE)
-
-
-gg_spec(list(sp1, detrended = sp1_detr)) +
-  geom_vline(xintercept = c(f1, f2, f3), lty = 2, colour =  "Red")
-
-
-
+```{r}
 sp1_10k <- SpecACF(ts(dat$y, deltat = 1), bin.width = 1, detrend =  FALSE)
 sp1_10k_detr <- SpecACF(ts(dat$y, deltat = 1), bin.width = 1, detrend =  TRUE)
 
-plot(y~time, data = dat[1:500,],  type = "l")
+gg_spec(list(raw = sp1_10k, detrended = sp1_10k_detr)) +
+  geom_vline(xintercept = c(f1, f2, f3), lty = 2, colour =  "Red")
+```
 
-sp1_0.5k <- SpecACF(ts(dat$y[1:500], deltat = 1), bin.width = 1, detrend =  FALSE)
-sp1_0.5k_detr <- SpecACF(ts(dat$y[1:500], deltat = 1), bin.width = 1, detrend =  TRUE)
+
+```{r}
+dat_500 <- dat[1:500,]
+plot(y~time, data = dat_500,  type = "l")
+```
 
 
-sp1_0.5k_detr_MTM <- SpecMTM(ts(dat$y[1:500], deltat = 1), detrend =  TRUE)
-
+```{r}
+sp1_0.5k <- SpecACF(ts(dat_500$y, deltat = 1), bin.width = 1, detrend =  FALSE)
+sp1_0.5k_detr <- SpecACF(ts(dat_500$y, deltat = 1), bin.width = 1, detrend =  TRUE)
 
 list(
   raw_10k = (sp1_10k),
   detrended_10k = (sp1_10k_detr),
   raw_0.5k = (sp1_0.5k), 
   detrended_0.5k = (sp1_0.5k_detr)
-  #detrended_0.5k_MTM = (sp1_0.5k_detr_MTM)
   ) %>% 
   lapply(., Spec2DF) %>% 
   bind_rows(., .id = "name") %>% 
-  separate(name, into = c("detrended", "length"), sep = "_") %>% 
+  separate(name, into = c("detrended", "ts_length"), sep = "_") %>% 
   mutate(spec_id = detrended) %>% 
   as_spec_df() %>% 
   gg_spec(., colour = detrended) +
-  facet_wrap(~length)#+
+  facet_wrap(~ts_length, labeller = label_both)#+
   #geom_vline(xintercept = c(f1, f2, f3), lty = 2, colour =  "blue")
-
-
 ```
+
+
+Fit and remove something closer to a spline
+
+```{r}
+lm_ns1 <- lm(y ~ splines::ns(time,3), data = dat_500)
+
+# fit.nls <- nls(y~C+alpha*sin(W*time+phi), data = dat_500,
+#                 start=list(C=27.63415, alpha=27.886, W=f3*2*pi, phi = 14))
+# 
+# dat_500$fttd_sine_nls <- fitted(fit.nls)
+# dat_500$res_sine_nls <- as.numeric(residuals(fit.nls))
+
+dat_500$fttd_sine <- fitted(lm_ns1)
+dat_500$res_sine <- residuals(lm_ns1)
+
+
+plot(y~time, data = dat_500, type = "l")
+lines(fttd_sine~time, data = dat_500, col = "green")
+#lines(fttd_sine_nls~time, data = dat_500, col = "red")
+```
+
+
+```{r}
+#plot(res_sine~time, data = dat_500, type = "l")
+
+sp1_res <- SpecACF(dat_500$res_sine, bin.width = 1)
+
+gg_spec(list(
+  spline_detrend = sp1_res, raw = sp1_0.5k, linear_detrend = sp1_0.5k_detr, full = sp1_10k
+))
+```
+
 
 
 
@@ -180,7 +207,6 @@ library(tidyr)
 library(PaleoSpec)
 library(ggplot2)
 
-
 N <- 1e03
 n_rep <- 1000
 alpha = 0.1
@@ -189,11 +215,8 @@ beta = 0
 dat <- crossing(
   rep = 1:n_rep,
   t = 1:N
-) #%>% 
-  # group_by(rep) %>% 
-  # mutate(
-  #   y = PaleoSpec::SimPLS(N = N, beta = beta, alpha = alpha) 
-  # )
+) 
+
 
 # Get a matrix of simulated timeseries
 ts_m <- replicate(n_rep, PaleoSpec::SimPLS(N = N, beta = beta, alpha = alpha))
